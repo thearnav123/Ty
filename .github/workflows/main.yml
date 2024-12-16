@@ -1,4 +1,4 @@
-name: Run Raja Workflow
+name: Run public Workflow
 
 on
   push:
