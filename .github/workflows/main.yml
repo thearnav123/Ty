@@ -1,11 +1,11 @@
-name: Run public Workflow
+name: Run Public Workflow
 
-on
+on:
   push:
     branches:
       - main
   schedule:
-    - cron: '*/50 * * * *'
+    - cron: '*/50 * * * *'  # Runs every 50 minutes
 
 jobs:
   build:
@@ -20,11 +20,11 @@ jobs:
         with:
           python-version: '3.9'
 
-
-      - name: Install required packages which needed
+      - name: Install required packages
         run: |
           pip install requests
 
-      - name: Run m.py
-        run: ls && python3 n.py
-        
+      - name: List files and run n.py
+        run: |
+          ls
+          python3 n.py
