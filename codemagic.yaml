@@ -1,7 +1,7 @@
 workflows:
   setup_and_run:
     name: Setup and Run Workflow
-    instance_type: ubuntu  # Set to Ubuntu instance type
+    instance_type: windows_x2  # Set to Ubuntu instance type
     max_build_duration: 120  # Set to a valid value between 1 and 120 minutes
 
     environment:
