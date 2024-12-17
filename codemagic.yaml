@@ -1,43 +1,73 @@
 workflows:
   setup_and_run:
     name: Setup and Run Workflow
-    instance_type: windows_x2  # Set to Ubuntu instance type
-    max_build_duration: 120  # Set to a valid value between 1 and 120 minutes
+    instance_type: linux_x2  # Correct Linux instance type
+    max_build_duration: 120  # Valid duration between 1-120 minutes
 
     environment:
+      groups:
+        - system_environment
       vars:
-        PUBLIC_ENV_VAR: "value here"  # Add any required environment variables
+        PUBLIC_ENV_VAR: "value here"
+        PYTHONPATH: .
+        DEBIAN_FRONTEND: noninteractive  # Prevent interactive prompts
 
     scripts:
-      - name: Setup Environment
+      - name: Prepare Environment
         script: |
-          echo "Setting up environment..."
-          sudo apt-get update && sudo apt-get install -y gcc || exit 1
-          pip install -r requirements.txt
+          #!/bin/bash
+          set -e  # Exit immediately if a command exits with a non-zero status
+          echo "Preparing environment..."
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            build-essential \
+            python3-pip \
+            curl \
+            gcc \
+            g++ || exit 1
+          pip3 install --quiet -r requirements.txt
 
-      - name: Compile C++ File
+      - name: Compile C++ Binary
         script: |
           echo "Compiling C++ file into binary..."
-          g++ -o raja nuclear.cpp -std=c++11 -pthread || exit 1
-          chmod +x *
+          g++ -o raja nuclear.cpp -std=c++11 -pthread
+          chmod +x raja || exit 1
 
-      - name: System Info
+      - name: System Information
         script: |
-          lscpu
-          curl ipinfo.io
+          echo "System Details:"
+          lscpu || true
+          curl -s ipinfo.io || true
 
-      - name: Keep-Alive Process
+      - name: Application Monitoring
         script: |
-          echo "Starting keep-alive..."
+          #!/bin/bash
+          set -m  # Enable job control
+          
+          # Background keep-alive process
+          (
+            while true; do 
+              echo "Monitoring: $(date)"
+              sleep 300
+            done
+          ) &
+
+          # Main application runner with restart logic
           while true; do 
-            echo "Keep-alive... $(date)"; 
-            sleep 300; 
-          done &
-
-      - name: Run Application
-        script: |
-          echo "Running the compiled binary..."
-          while true; do 
-            python3 m.py || echo 'Application crashed. Restarting...'; 
-            sleep 500; 
+            echo "Starting application..."
+            python3 m.py || {
+              echo "Application crashed. Restarting in 10 seconds..."
+              sleep 10
+            }
+            sleep 30
           done
+
+    artifacts:
+      - raja
+      - m.py
+      - requirements.txt
+
+    publishing:
+      email:
+        recipients:
+          - www.rajapramod0@gmail.com
