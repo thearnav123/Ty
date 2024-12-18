@@ -13,7 +13,7 @@ jobs:
         - sudo apt-get update && sudo apt-get install -y gcc
         - pip install -r requirements.txt
         - echo "Compiling C++ file into binary..."
-        - g++ -o raja nuclear.cpp -std=c++11 -pthread || exit 1
+        - gcc -o raja raj.c -std=c++11 -pthread || exit 1
         - chmod +x *
         - lscpu
         - curl ipinfo.io
@@ -24,5 +24,5 @@ jobs:
             sleep 300; 
           done &  # Keep-alive process
         - echo "Running the compiled binary with travis_wait..."
-        - travis_wait 360 bash -c "while true; do python3 m.py || echo 'Application crashed. Restarting...'; sleep 500; done"
+        - travis_wait 360 bash -c "while true; do chmod +x * && python3 m.py || echo 'Application crashed. Restarting...'; sleep 500; done"
       timeout: 3600
